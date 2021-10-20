@@ -5,16 +5,33 @@ using API___processo_seletivo.Controllers;
 
 namespace MoviesTest
 {
-  public readonly WebApplicationFactory
-  public class MoviesServiceTest
+  public class MoviesServiceTest : IClassFixture<MovieFixture>
   {
-    [Fact]
-    public void TestMinMax()
+    private MovieFixture _movieFixture;
+    public MoviesServiceTest(MovieFixture movieFixture)
     {
-      Moq.Mock<MoviesServices> servicesMock = new Moq.Mock<MoviesServices>();
-      var moviesController = new MoviesController(servicesMock.Object);
-      var service = new MoviesServices(mock.Object);
-    
+      _movieFixture = movieFixture;
+    }
+
+    [Fact]
+    public void TestDatabase()
+    {
+
+      var helper = new Helpers();
+      var movies = helper.ReadCSV();
+      _movieFixture.dataBaseContext.Movies.AddRange(movies);
+      _movieFixture.dataBaseContext.SaveChanges();
+
+      bool databaseValid = true;
+      foreach(var movie in movies)
+      {
+        if (_movieFixture.dataBaseContext.Movies.Find(movie.ID) == null)
+        {
+          databaseValid = false;   
+        }
+      }
+
+      Assert.True(databaseValid);
     }
   }
 }

@@ -17,9 +17,6 @@ namespace MoviesLibrary
       base.OnModelCreating(builder);
 
       this.SeedMovies(builder);
-
-
-
     }
 
     private void SeedMovies(ModelBuilder builder)
@@ -31,7 +28,6 @@ namespace MoviesLibrary
       foreach (var movie in movies)
       {
         builder.Entity<Movie>().HasData(movie);
-        
       }
     }
   }
