@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MoviesLibrary;
 
 namespace API___processo_seletivo.Controllers
 {
@@ -6,42 +7,31 @@ namespace API___processo_seletivo.Controllers
   [ApiController]
   public class MoviesController : ControllerBase
   {
-    private readonly DatabaseContext _dbContext;
-    public MoviesController(DatabaseContext db)
+    private readonly MoviesServices _service ;
+    public MoviesController(MoviesServices service)
     {
-      _dbContext = db;
-      var hasMovies = _dbContext.Movies.Any();
-      if (!hasMovies)
-      {
-        //Lê CSV e Grava no banco
-        var helper = new Helpers();
-        var moviesInCSV = helper.ReadCSV();
-
-
-        _dbContext.Movies.AddRange(moviesInCSV);
-        _dbContext.SaveChanges();
-      }
+      _service = service;
     }
 
     // GET: api/<MoviesController>
     [HttpGet]
     public IEnumerable<Movie> Get()
     {
-      return _dbContext.Movies.ToList();
+      return _service.Get();
     }
 
     // GET api/<MoviesController>/5
     [HttpGet("{id}")]
     public Movie Get(Guid id)
     {
-      return _dbContext.Movies.FirstOrDefault(movie => movie.ID.Equals(id));
+      return _service.Get(id);
     }
 
     [Route("api/MoviesController/GetByTitle")]
     [HttpGet]
     public Movie GetByTitle(string title)
     {
-      return _dbContext.Movies.FirstOrDefault(movie => movie.Title.Equals(title));
+      return _service.GetByTitle(title);
     }
 
 
@@ -50,70 +40,8 @@ namespace API___processo_seletivo.Controllers
     [HttpGet]
     public ActionResult IntervaloPremios()
     {
-      var movies = _dbContext.Movies.Where(winner => winner.Winner.Equals("yes")).OrderBy(movie => movie.Year).ToList();
-
-      var firstTwiceWinner = new
-      {
-        producer = "",
-        interval = "",
-        previouswin = "",
-        followingWin = ""
-      };
-
-      var producerWinners = new List<Producer>();
-
-      foreach (var movie in movies)
-      {
-
-        String[] separator = { ",", " and " };
-        var movieProducers = movie.Producers.Trim().Split(separator, StringSplitOptions.RemoveEmptyEntries);
-
-        for (var i = 0; i < movieProducers.Length; i++)
-        {
-          var producerName = movieProducers[i].Trim();
-          if (producerWinners.Any(p => p.Name.Equals(producerName)))
-          {
-            producerWinners.FirstOrDefault(p => p.Name.Equals(producerName)).Years.Add(movie.Year);
-            var firstWin = producerWinners.FirstOrDefault(p => p.Name.Equals(producerName));
-
-            if (String.IsNullOrEmpty(firstTwiceWinner.producer))
-            {
-              firstTwiceWinner = new
-              {
-                producer = producerName,
-                interval = (movie.Year - firstWin.Years.FirstOrDefault()).ToString(),
-                previouswin = firstWin.Years.FirstOrDefault().ToString(),
-                followingWin = movie.Year.ToString()
-              };
-            }
-          }
-          else
-          {
-            var years = new List<int>();
-            years.Add(movie.Year);
-
-            producerWinners.Add(new Producer { Name = producerName, Years = years });
-          }
-        }
-      }
-
-      var maxInterval = producerWinners.Max(p => p.Years.Max() - p.Years.Min());
-      var maxIntervalWinner = producerWinners.First(p => (p.Years.Max() - p.Years.Min()) == maxInterval);
-
-      var retorno = new
-      {
-        min = new[] { firstTwiceWinner },
-        max = new[] {
-          new
-          {
-            producer = maxIntervalWinner.Name,
-            interval = maxInterval.ToString(),
-            previouswin = maxIntervalWinner.Years.Min().ToString(),
-            followingWin = maxIntervalWinner.Years.Max().ToString(),
-          }}
-      };
-
-      return Ok(retorno);
+      var minMax = _service.GetMinMax();
+      return Ok(minMax);
     }
 
     // POST api/<MoviesController>

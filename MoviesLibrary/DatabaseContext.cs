@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace API___processo_seletivo
+namespace MoviesLibrary
 {
   public class DatabaseContext : DbContext
   {
@@ -34,15 +34,5 @@ namespace API___processo_seletivo
         
       }
     }
-  }
-
-  public class Movie
-  {
-    public Guid ID { get; set; }
-    public int Year { get; set; }
-    public string Title { get; set; }
-    public string Studios { get; set; }
-    public string Producers { get; set; }
-    public string Winner { get; set; }
   }
 }

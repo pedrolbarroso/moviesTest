@@ -1,12 +1,16 @@
 using API___processo_seletivo;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
+using MoviesLibrary;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+builder.Services.AddScoped<MoviesServices>();
+
 builder.Services.AddSwaggerGen(c =>
 {
   c.SwaggerDoc("v1", new() { Title = "API___processo_seletivo", Version = "v1" });

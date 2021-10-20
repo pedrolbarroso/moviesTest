@@ -1,10 +1,10 @@
-﻿namespace API___processo_seletivo
+﻿namespace MoviesLibrary
 {
   public class Helpers
   {
     public List<Movie> ReadCSV()
     {
-      using (var reader = new StreamReader(@"D:\movielist.csv"))
+      using (var reader = new StreamReader(@"movielist.csv"))
       {
         List<Movie> movies = new List<Movie>();
         bool firstline = true;
